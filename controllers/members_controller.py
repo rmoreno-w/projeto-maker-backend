@@ -13,16 +13,16 @@ async def create_member(member_data: MakerMember):
 
 @router.get("/")
 async def get_members():
-    return await MakerMember.objects.all()
+    return await MakerMember.objects.select_related('address').all()
 
 @router.get("/{name_or_email}")
 async def get_members_by_name_or_email(name_or_email: str, response: Response):
-    users = await MakerMember.objects.all(name=name_or_email)
+    users = await MakerMember.objects.select_related('address').all(name=name_or_email)
     if users != []:
         return users
     
     else:
-        users = await MakerMember.objects.all(email=name_or_email)
+        users = await MakerMember.objects.select_related('address').all(email=name_or_email)
         if users != []:
             return users
         else:
