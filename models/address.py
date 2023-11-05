@@ -1,13 +1,18 @@
-from typing import Optional
+import ormar
+from config import database, metadata
 
-from pydantic import BaseModel
 
+class Address(ormar.Model):
+    class Meta:
+        metadata = metadata
+        database = database
+        tablename: str ='addresses'
 
-class Address(BaseModel):
-    street: str
-    cep: str
-    number: str
-    district: str
-    city: str
-    state: str
-    complement: Optional[str] = None
+    id: int = ormar.Integer(primary_key=True)
+    street: str = ormar.String(max_length=200)
+    cep: str = ormar.String(max_length=10)
+    number: int = ormar.Integer()
+    district: str = ormar.String(max_length=200)
+    city: str = ormar.String(max_length=200)
+    state: str = ormar.String(max_length=200)
+    complement: str = ormar.String(max_length=200, nullable=True)
