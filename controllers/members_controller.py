@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+import ormar
+from fastapi import APIRouter, Response
 from models.member import MakerMember
 
 router = APIRouter()
@@ -11,3 +12,16 @@ async def create_member(member_data: MakerMember):
 @router.get("/")
 async def get_members():
     return await MakerMember.objects.all()
+
+@router.get("/{name_or_email}")
+async def get_members_by_name_or_email(name_or_email: str, response: Response):
+    users = await MakerMember.objects.all(name=name_or_email)
+    if users != []:
+        return users
+    
+    else:
+        users = await MakerMember.objects.all(email=name_or_email)
+        if users != []:
+            return users
+        else:
+            return {"message": f"Usuário com nome ou email igual a '{name_or_email}' não encontrado na base de dados"}
