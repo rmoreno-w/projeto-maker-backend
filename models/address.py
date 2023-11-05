@@ -26,8 +26,8 @@ class Address(ormar.Model):
             raise ValueError('Campo CEP inválido - Formato requerido: xx.xxx-xxx')
         return value
     
-    @validator('district')
-    def validate_district_formatting(cls, value):
+    @validator('state')
+    def validate_state_formatting(cls, value):
         if not re.compile('^[A-Z]{2}$').match(value):
             raise ValueError('Campo Estado inválido - Formato requerido: Sigla de duas letras maiúsculas')
         return value

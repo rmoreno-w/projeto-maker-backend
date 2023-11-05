@@ -1,11 +1,13 @@
 import ormar
 from fastapi import APIRouter, Response
+from models.address import Address
 from models.member import MakerMember
 
 router = APIRouter()
 
 @router.post("/")
 async def create_member(member_data: MakerMember):
+    await member_data.address.save()
     await member_data.save()
     return member_data
 

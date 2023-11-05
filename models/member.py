@@ -14,7 +14,7 @@ class MakerMember(ormar.Model):
 
     id: int = ormar.Integer(primary_key=True)
     name: str = ormar.String(max_length=200)
-    cpf: str = ormar.String(max_length=12)
+    cpf: str = ormar.String(max_length=14)
     email: str = ormar.String(max_length=200)
     address: Address = ormar.ForeignKey(Address)
     activation_state: bool = ormar.Boolean(default=True)
@@ -28,6 +28,6 @@ class MakerMember(ormar.Model):
 
     @validator('email')
     def validate_email_formatting(cls, value):
-        if not re.compile('^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').match(value):
+        if not re.compile('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').match(value):
             raise ValueError('Campo email inválido, verifique por favor')
         return value
