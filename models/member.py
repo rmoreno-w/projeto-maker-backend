@@ -1,6 +1,9 @@
+import re
+
 import ormar
 from config import database, metadata
 from models.address import Address
+from pydantic import validator
 
 
 class MakerMember(ormar.Model):
@@ -16,3 +19,15 @@ class MakerMember(ormar.Model):
     address: Address = ormar.ForeignKey(Address)
     activation_state: bool = ormar.Boolean(default=True)
     password: str = ormar.String(max_length=200)
+
+    @validator('cpf')
+    def validate_cpf_formatting(cls, value):
+        if not re.compile('^\d{3}.\d{3}.\d{3}-\d{2}$').match(value):
+            raise ValueError('Campo CPF inválido - Formato requerido: xxx.xxx.xxx-xx')
+        return value
+
+    @validator('email')
+    def validate_email_formatting(cls, value):
+        if not re.compile('^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').match(value):
+            raise ValueError('Campo email inválido, verifique por favor')
+        return value

@@ -12,17 +12,17 @@ from routes import router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #Executed before the app starts
+    #Método que inicializa database, utilizando ciclo de vida do servidor
+
+    #Executado antes de Inicializar o servidor
     database_ = app.state.database
     if not database_.is_connected:
         await database_.connect()
-        print(database_.is_connected)
 
     yield
 
-    #Executed after shutdown
+    #Executado após desligar o servidor
     database_ = app.state.database
-    print(database_)
     if database_.is_connected:
         await database_.disconnect()
 
