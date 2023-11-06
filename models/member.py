@@ -16,7 +16,7 @@ class MakerMember(ormar.Model):
     name: str = ormar.String(max_length=200)
     cpf: str = ormar.String(max_length=14)
     email: str = ormar.String(max_length=200)
-    address: Address = ormar.ForeignKey(Address)
+    address: Address = ormar.ForeignKey(Address, skip_reverse=True)
     activation_state: bool = ormar.Boolean(default=True)
     password: str = ormar.String(max_length=200)
 
