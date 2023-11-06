@@ -2,11 +2,14 @@ import ormar
 from fastapi import APIRouter, Response
 from models.member import MakerMember
 from models.requests.member_update_data import MemberUpdateData
+from models.responses.member_create_response import UserCreationResponse
+from security import encrypt_password
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/", response_model=UserCreationResponse)
 async def create_member(member_data: MakerMember):
+    member_data.password = encrypt_password(member_data.password)
     await member_data.address.save()
     await member_data.save()
     return member_data
@@ -26,6 +29,7 @@ async def get_members_by_name_or_email(name_or_email: str, response: Response):
         if users != []:
             return users
         else:
+            response.status_code = 404
             return {"message": f"Usuário com nome ou email igual a '{name_or_email}' não encontrado na base de dados"}
 
 @router.patch("/{member_id}")
@@ -38,6 +42,9 @@ async def update_member(member_id: int, response: Response, updated_fields: Memb
         if "address" in fields_to_update:
             await existing_member.address.update(**fields_to_update["address"])
             del fields_to_update["address"]
+
+        if "password" in fields_to_update:
+            existing_member.password = encrypt_password(fields_to_update["password"])
 
         if len(fields_to_update) > 0:
             await existing_member.update(**fields_to_update)

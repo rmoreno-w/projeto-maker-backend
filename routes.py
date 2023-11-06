@@ -3,4 +3,4 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-router.include_router(members.router, prefix='/members')
+router.include_router(members.router, prefix='/members', tags=['Membros'])

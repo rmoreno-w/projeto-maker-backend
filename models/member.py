@@ -15,7 +15,7 @@ class MakerMember(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     name: str = ormar.String(max_length=200)
     cpf: str = ormar.String(max_length=14)
-    email: str = ormar.String(max_length=200)
+    email: str = ormar.String(max_length=200, unique=True)
     address: Address = ormar.ForeignKey(Address, skip_reverse=True)
     activation_state: bool = ormar.Boolean(default=True)
     password: str = ormar.String(max_length=200)
