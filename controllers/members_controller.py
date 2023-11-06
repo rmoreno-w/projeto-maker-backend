@@ -48,3 +48,21 @@ async def update_member(member_id: int, response: Response, updated_fields: Memb
         response_status_code = 404
         response.status_code = response_status_code
         return {"message" : f"Membro de id {member_id} não encontrado"}
+
+@router.delete("/{member_id}")
+async def delete_member(member_id: int, response: Response):
+    try:
+        existing_member = await MakerMember.objects.select_related('address').get(id=member_id)
+
+        member_address = existing_member.address
+        await existing_member.delete()
+
+        if member_address:
+            await member_address.delete()
+
+        return {"message": "Membro maker removido com sucesso"}
+
+    except ormar.exceptions.NoMatch:
+        response_status_code = 404
+        response.status_code = response_status_code
+        return {"message" : f"Membro de id {member_id} não encontrado"}
