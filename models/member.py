@@ -5,6 +5,7 @@ from config import database, metadata
 from models.address import Address
 from pydantic import validator
 
+valid_user_types = ['admin', 'member', 'customer']
 
 class MakerMember(ormar.Model):
     class Meta:
