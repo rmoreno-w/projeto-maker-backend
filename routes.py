@@ -1,6 +1,7 @@
-from controllers import members_controller as members
 from fastapi import APIRouter
+
+from controllers import users_controller as users
 
 router = APIRouter()
 
-router.include_router(members.router, prefix='/members', tags=['Membros'])
+router.include_router(users.router, prefix='/users', tags=['Usuários'])
