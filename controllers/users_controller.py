@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Response
 
 from controllers.depends.user import get_logged_in_user, get_user_with_role
 from models.requests.user_update_data import UserUpdateData
+from models.responses.user_check_by_id_response import UserCheckByIdResponse
 from models.responses.user_create_response import UserCreationResponse
 from models.user import User
 from security import create_jwt_token, encrypt_password, verify_password
@@ -33,6 +34,20 @@ async def get_users_by_name_or_email(name_or_email: str, response: Response, log
             response.status_code = 404
             return {"message": f"Usuário com nome ou email igual a '{name_or_email}' não encontrado na base de dados"}
 
+@router.get("/find/info", response_model=UserCheckByIdResponse)
+async def get_user_info(response: Response, logged_in_user: User = Depends(get_logged_in_user)):
+    try:
+        existing_user = await User.objects.get(id=logged_in_user.id)
+
+        print (existing_user)
+        return existing_user
+
+    except ormar.exceptions.NoMatch:
+        response_status_code = 404
+        response.status_code = response_status_code
+        return {"message" : f"Usuário de id {logged_in_user.id} não encontrado"}
+
+
 @router.patch("/{user_id}")
 async def update_user(user_id: int, response: Response, updated_fields: UserUpdateData, logged_in_user: User = Depends(get_logged_in_user)):
     try:
@@ -52,7 +67,6 @@ async def update_user(user_id: int, response: Response, updated_fields: UserUpda
         response_status_code = 404
         response.status_code = response_status_code
         return {"message" : f"Usuário de id {user_id} não encontrado"}
-
 @router.delete("/{user_id}")
 async def delete_user(user_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
