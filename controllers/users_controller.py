@@ -48,10 +48,11 @@ async def get_user_info(response: Response, logged_in_user: User = Depends(get_l
         return {"message" : f"Usuário de id {logged_in_user.id} não encontrado"}
 
 
-@router.patch("/{user_id}")
-async def update_user(user_id: int, response: Response, updated_fields: UserUpdateData, logged_in_user: User = Depends(get_logged_in_user)):
+@router.patch("/")
+async def update_user(response: Response, updated_fields: UserUpdateData, logged_in_user: User = Depends(get_logged_in_user)):
+    print(logged_in_user)
     try:
-        existing_user = await User.objects.get(id=user_id)
+        existing_user = await User.objects.get(id=logged_in_user.id)
 
         fields_to_update = updated_fields.dict(exclude_unset=True) #Pega as propriedades que vieram da requisição, não inclui as não presentes
 
@@ -61,7 +62,8 @@ async def update_user(user_id: int, response: Response, updated_fields: UserUpda
         if len(fields_to_update) > 0:
             await existing_user.update(**fields_to_update)
 
-        return existing_user
+        edited_fields = str(list(fields_to_update.keys()))
+        return {"message": f'{edited_fields} editado(s) com sucesso'}
 
     except ormar.exceptions.NoMatch:
         response_status_code = 404
