@@ -2,11 +2,9 @@ import re
 from typing import Optional
 
 import ormar
-import pydantic
 from pydantic import Json, validator
 
 from config import database, metadata
-from models.address import Address
 
 valid_user_types = ['admin', 'member', 'customer']
 
@@ -30,7 +28,8 @@ class User(ormar.Model):
     city: str = ormar.String(max_length=200)
     state: str = ormar.String(max_length=2)
     complement: str = ormar.String(max_length=200, nullable=True)
-    role: Optional[Json] = ormar.JSON(default=[])
+    unifei_registration_number: str = ormar.String(max_length=20, nullable=True)
+    role: Optional[Json] = ormar.JSON(default=['customer'])
 
     @validator('cpf')
     def validate_cpf_formatting(cls, value):
@@ -56,6 +55,16 @@ class User(ormar.Model):
             raise ValueError('Campo Estado inválido - Formato requerido: Sigla de duas letras maiúsculas')
         return value
     
-    # @validator('role')
-    # def validate_role_formatting(cls, value):
-    #     return list(set(value))
+    @validator('role')
+    def validate_role_formatting(cls, roles_list):
+        if not isinstance(roles_list, list):
+            raise ValueError('As funçoes do usuário devem ser incluidas em uma lista/vetor')
+        
+        for role in roles_list:
+            if not isinstance(role, str) or role not in valid_user_types:
+                raise ValueError(f'A função {role} nao é valida')
+        return roles_list
+    
+    @validator('role')
+    def remove_duplicated_roles(cls, roles_list):
+        return list(set(roles_list))
