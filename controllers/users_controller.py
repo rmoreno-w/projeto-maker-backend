@@ -57,7 +57,7 @@ async def update_user(response: Response, updated_fields: UserUpdateData, logged
         fields_to_update = updated_fields.dict(exclude_unset=True) #Pega as propriedades que vieram da requisição, não inclui as não presentes
 
         if "password" in fields_to_update:
-            existing_user.password = encrypt_password(fields_to_update["password"])
+            fields_to_update["password"] = encrypt_password(fields_to_update["password"])
 
         if len(fields_to_update) > 0:
             await existing_user.update(**fields_to_update)
@@ -68,7 +68,8 @@ async def update_user(response: Response, updated_fields: UserUpdateData, logged
     except ormar.exceptions.NoMatch:
         response_status_code = 404
         response.status_code = response_status_code
-        return {"message" : f"Usuário de id {user_id} não encontrado"}
+        return {"message" : f"Usuário de id {logged_in_user.id} não encontrado"}
+    
 @router.delete("/{user_id}")
 async def delete_user(user_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
@@ -91,7 +92,8 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
     return {
         "access_token": create_jwt_token(user.id),
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "role": user.role[0]
     }
 #login@user.com poderosa123
 
