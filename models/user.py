@@ -30,6 +30,7 @@ class User(ormar.Model):
     complement: str = ormar.String(max_length=200, nullable=True)
     unifei_registration_number: str = ormar.String(max_length=20, nullable=True)
     role: Optional[Json] = ormar.JSON(default=['customer'])
+    is_user_deleted: bool = ormar.Boolean(default=False)
 
     @validator('cpf')
     def validate_cpf_formatting(cls, value):

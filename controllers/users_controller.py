@@ -18,16 +18,16 @@ async def create_user(user_data: User):
 
 @router.get("/")
 async def get_users(logged_in_user: User = Depends(get_logged_in_user)):
-    return await User.objects.all()
+    return await User.objects.all(is_user_deleted=False)
 
 @router.get("/{name_or_email}")
 async def get_users_by_name_or_email(name_or_email: str, response: Response, logged_in_user: User = Depends(get_logged_in_user)):
-    users = await User.objects.all(name=name_or_email)
+    users = await User.objects.all(is_user_deleted=False, name=name_or_email)
     if users != []:
         return users
     
     else:
-        users = await User.objects.all(email=name_or_email)
+        users = await User.objects.all(is_user_deleted=False, email=name_or_email)
         if users != []:
             return users
         else:
@@ -37,7 +37,7 @@ async def get_users_by_name_or_email(name_or_email: str, response: Response, log
 @router.get("/find/info", response_model=UserCheckByIdResponse)
 async def get_user_info(response: Response, logged_in_user: User = Depends(get_logged_in_user)):
     try:
-        existing_user = await User.objects.get(id=logged_in_user.id)
+        existing_user = await User.objects.get(is_user_deleted=False, id=logged_in_user.id)
 
         print (existing_user)
         return existing_user
@@ -52,7 +52,7 @@ async def get_user_info(response: Response, logged_in_user: User = Depends(get_l
 async def update_user(response: Response, updated_fields: UserUpdateData, logged_in_user: User = Depends(get_logged_in_user)):
     print(logged_in_user)
     try:
-        existing_user = await User.objects.get(id=logged_in_user.id)
+        existing_user = await User.objects.get(is_user_deleted=False, id=logged_in_user.id)
 
         fields_to_update = updated_fields.dict(exclude_unset=True) #Pega as propriedades que vieram da requisição, não inclui as não presentes
 
@@ -73,9 +73,11 @@ async def update_user(response: Response, updated_fields: UserUpdateData, logged
 @router.delete("/{user_id}")
 async def delete_user(user_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
-        existing_user = await User.objects.get(id=user_id)
+        existing_user = await User.objects.get(is_user_deleted=False, id=user_id)
 
-        await existing_user.delete()
+        # await existing_user.delete()
+        existing_user.is_user_deleted = True
+        await existing_user.update()
 
         return {"message": "Usuário removido com sucesso"}
 
@@ -86,7 +88,7 @@ async def delete_user(user_id: int, response: Response, logged_in_user: User = D
 
 @router.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
-    user = await User.objects.get_or_none(email=username)
+    user = await User.objects.get_or_none(is_user_deleted=False, email=username)
     if not user or not verify_password(password, user.password):
         raise HTTPException(status_code=403, detail="Email ou senha incorreto(s)")
 
@@ -100,7 +102,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 @router.post("/{user_id}/role/{role}")
 async def add_role(user_id: int, role: str, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
-        existing_user = await User.objects.get(id=user_id)
+        existing_user = await User.objects.get(is_user_deleted=False, id=user_id)
 
         existing_user.role += [role]
         await existing_user.update()
@@ -118,7 +120,7 @@ async def add_role(user_id: int, role: str, response: Response, logged_in_user: 
 @router.patch("/{user_id}/role/{role}")
 async def remove_role(user_id: int, role: str, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
-        existing_user = await User.objects.get(id=user_id)
+        existing_user = await User.objects.get(is_user_deleted=False, id=user_id)
 
         existing_user.role.remove(role)
 
