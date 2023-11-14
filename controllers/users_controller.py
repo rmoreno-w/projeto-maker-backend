@@ -47,7 +47,6 @@ async def get_user_info(response: Response, logged_in_user: User = Depends(get_l
         response.status_code = response_status_code
         return {"message" : f"Usuário de id {logged_in_user.id} não encontrado"}
 
-
 @router.patch("/")
 async def update_user(response: Response, updated_fields: UserUpdateData, logged_in_user: User = Depends(get_logged_in_user)):
     print(logged_in_user)
@@ -69,7 +68,7 @@ async def update_user(response: Response, updated_fields: UserUpdateData, logged
         response_status_code = 404
         response.status_code = response_status_code
         return {"message" : f"Usuário de id {logged_in_user.id} não encontrado"}
-    
+
 @router.delete("/{user_id}")
 async def delete_user(user_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
     try:
@@ -104,7 +103,8 @@ async def add_role(user_id: int, role: str, response: Response, logged_in_user: 
     try:
         existing_user = await User.objects.get(is_user_deleted=False, id=user_id)
 
-        existing_user.role += [role]
+        # existing_user.role += [role]
+        existing_user.role = [role]
         await existing_user.update()
         return existing_user
 
