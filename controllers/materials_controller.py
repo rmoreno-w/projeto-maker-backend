@@ -35,3 +35,17 @@ async def update_material(material_id: int, response: Response, updated_fields: 
         response_status_code = 404
         response.status_code = response_status_code
         return {"message" : f"Material de id {material_id} não encontrado"}
+
+@router.delete("/{material_id}")
+async def delete_material(material_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
+    try:
+        existing_material = await Material.objects.get(id=material_id)
+
+        await existing_material.delete()
+
+        return {"message": "Material removido com sucesso"}
+
+    except ormar.exceptions.NoMatch:
+        response_status_code = 404
+        response.status_code = response_status_code
+        return {"message" : f"Material de id {material_id} não encontrado"}
