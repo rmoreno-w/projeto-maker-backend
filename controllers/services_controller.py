@@ -18,14 +18,14 @@ async def create_service(service_data: Service, logged_in_user: User = Depends(g
 
 @router.get("/", response_model=List[ServiceInResponse])
 async def get_services(logged_in_user: User = Depends(get_user_with_role([]))):
-    return await Service.objects.all()
+    return await Service.objects.all(is_service_available=True)
 
 
 @router.patch("/{service_id}")
 async def update_service(service_id: int, response: Response, updated_fields: ServiceUpdateData, logged_in_user: User = Depends(get_user_with_role(['admin', 'member']))):
     # print(logged_in_user)
     try:
-        existing_service = await Service.objects.get(id=service_id)
+        existing_service = await Service.objects.get(id=service_id, is_service_available=True)
 
         fields_to_update = updated_fields.dict(exclude_unset=True) #Pega as propriedades que vieram da requisição, não inclui as não presentes
 
@@ -34,6 +34,21 @@ async def update_service(service_id: int, response: Response, updated_fields: Se
 
         edited_fields = str(list(fields_to_update.keys()))
         return {"message": f'{edited_fields} editado(s) com sucesso'}
+
+    except ormar.exceptions.NoMatch:
+        response_status_code = 404
+        response.status_code = response_status_code
+        return {"message" : f"Serviço de id {service_id} não encontrado"}
+
+@router.delete("/{service_id}")
+async def delete_material(service_id: int, response: Response, logged_in_user: User = Depends(get_user_with_role(roles=['admin']))):
+    try:
+        existing_service = await Service.objects.get(id=service_id)
+
+        existing_service.is_service_available = False
+        await existing_service.update()
+
+        return {"message": "Serviço removido com sucesso"}
 
     except ormar.exceptions.NoMatch:
         response_status_code = 404

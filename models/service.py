@@ -13,3 +13,4 @@ class Service(ormar.Model):
     name: str = ormar.String(max_length=200)
     description: str = ormar.String(max_length=1200)
     base_price: int = ormar.Integer(minimum=0)
+    is_service_available: bool = ormar.Boolean(default=True)
