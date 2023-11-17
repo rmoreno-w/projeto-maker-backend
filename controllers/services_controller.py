@@ -14,3 +14,7 @@ router = APIRouter()
 async def create_service(service_data: Service, logged_in_user: User = Depends(get_user_with_role(['admin']))):
     await service_data.save()
     return {"details": "Serviço criado com sucesso", "id" : f"{service_data.id}"}
+
+@router.get("/", response_model=List[ServiceInResponse])
+async def get_services(logged_in_user: User = Depends(get_user_with_role([]))):
+    return await Service.objects.all()
