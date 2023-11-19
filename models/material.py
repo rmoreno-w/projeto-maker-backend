@@ -14,3 +14,4 @@ class Material(ormar.Model):
     description: str = ormar.String(max_length=200)
     quantity: float = ormar.Float(minimum=0)
     unit: str = ormar.String(max_length=200)
+    is_material_deleted: bool = ormar.Boolean(default=False)

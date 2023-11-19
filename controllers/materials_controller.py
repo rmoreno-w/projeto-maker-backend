@@ -41,7 +41,8 @@ async def delete_material(material_id: int, response: Response, logged_in_user: 
     try:
         existing_material = await Material.objects.get(id=material_id)
 
-        await existing_material.delete()
+        existing_material.is_material_deleted = True
+        await existing_material.update()
 
         return {"message": "Material removido com sucesso"}
 
