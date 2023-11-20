@@ -4,6 +4,7 @@ import ormar
 from fastapi import APIRouter, Depends, Response
 
 from controllers.depends.user import get_user_with_role
+from models.order import Order
 from models.requests.service_update_data import ServiceUpdateData
 # from models.responses.services_listing_response import ServiceInResponse
 from models.service import Service
@@ -20,12 +21,17 @@ async def create_service_in_order(service_in_order_data: ServiceInOrder, logged_
     
     service_to_save = await ServiceInOrder(service_id=new_service_in_order.service_id, order_id=new_service_in_order.order_id, service_price=new_service_in_order.service_price, service_data=new_service_in_order.service_data).save()
     print(service_to_save)
-    # .save()
-    # return {"details": "Serviço criado com sucesso", "id" : f"{service_to_save.id}"}
+    return {"details": f"Serviço de id {service_to_save.id} criado com sucesso no pedido {service_to_save.service_id}"}
 
-# @router.get("/")
-# async def get_services(logged_in_user: User = Depends(get_user_with_role([]))):
-#     return await Service.objects.all(is_service_available=True)
+@router.get("/")
+async def get_services_in_order(logged_in_user: User = Depends(get_user_with_role([]))):
+    # x = (await Order.objects.select_all().all())
+    # x = (await Order.objects.select_related("services").all())
+    # x = await ServiceInOrder.objects.select_all().order_by('service_id__id').all()
+    x = await ServiceInOrder.objects.select_all().order_by('id').all()
+    # select_related('service_in_order').all())
+    return x
+    # return await Order.objects.select_related('service_in_order').all()
 
 
 # @router.patch("/{service_id}")
