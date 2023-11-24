@@ -35,16 +35,20 @@ async def get_my_orders(logged_in_user: User = Depends(get_user_with_role(['cust
 
 @router.patch("/{order_id}")
 async def update_order(order_id: int, response: Response, updated_fields: OrderUpdateData, logged_in_user: User = Depends(get_user_with_role(['admin', 'member']))):
-    # print(logged_in_user)
+    print(updated_fields)
     try:
         existing_order = await Order.objects.get(id=order_id)
 
         fields_to_update = updated_fields.dict(exclude_unset=True) #Pega as propriedades que vieram da requisição, não inclui as não presentes
 
-        print(fields_to_update)
         if len(fields_to_update) > 0:
             await existing_order.update(**fields_to_update)
 
+        if "services" in fields_to_update:
+            for service in fields_to_update['services']:
+                existing_service_in_order = await ServiceInOrder.objects.get(id=service['id'])
+                await existing_service_in_order.update(**service)
+                
         edited_fields = str(list(fields_to_update.keys()))
         return {"message": f'{edited_fields} editado(s) com sucesso'}
 
