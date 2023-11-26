@@ -16,5 +16,6 @@ class ServiceInOrder(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     order_id: int = ormar.ForeignKey(to=Order, skip_reverse=False, related_name='services')
     service_id: int = ormar.ForeignKey(to=Service, skip_reverse=True)
-    service_price: float | None = ormar.Float(minimum=0, nullable=True)
+    service_base_price: int | None = ormar.Integer(minimum=0, nullable=True)
+    service_price: int | None = ormar.Integer(minimum=0, nullable=True)
     service_data: Json | None = ormar.JSON(nullable=True)

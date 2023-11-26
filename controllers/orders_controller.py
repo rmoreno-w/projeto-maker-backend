@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Response
 from controllers.depends.user import get_user_with_role
 from models.order import Order
 from models.requests.order_update_data import OrderUpdateData
+from models.service import Service
 from models.service_in_order import ServiceInOrder
 from models.user import User
 
@@ -14,11 +15,17 @@ router = APIRouter()
 @router.post("/")
 # async def create_order(order_data: Order, logged_in_user: User = Depends(get_user_with_role([]))):
 async def create_order(order_data: list[ServiceInOrder], logged_in_user: User = Depends(get_user_with_role([]))):
-    newOrder = await Order(customer_id=logged_in_user.id, solicited_at=datetime.now(), price=0).save()
+    newOrder = await Order(customer_id=logged_in_user.id, solicited_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), price=0).save()
+
+    services = await Service.objects.all(is_service_available=True)
 
     for service in order_data:
-        service.order_id = newOrder.id
-        newOrder.price += service.service_price
+        service_index_in_services_array = services.index(service.service_id) # .index acha o elemento que tenha como índice o que voce passa como parametro 
+        found_service = services[service_index_in_services_array]            # Achando a Entidade do serviço com index igual ao do serviço recebido na chamada http
+
+        service.order_id = newOrder.id                                       # Ligando o serviço ao pedido
+        service.service_base_price = found_service.base_price                # Igualando o preco base do servico no pedido ao preço base da Entidade serviço
+        newOrder.price += service.service_base_price                         # Somando o preço do serviço no preço do pedido
         await service.save()
 
     await newOrder.update()
