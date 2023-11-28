@@ -34,7 +34,7 @@ class Order(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     customer_id: int = ormar.ForeignKey(to=User, skip_reverse=True)
     payment_status: str = ormar.String(max_length=25, choices=list(PaymentStatus), default='Unpaid')
-    price: float = ormar.Float(minimum=0)
+    price: int = ormar.Integer(minimum=0)
     order_status: str = ormar.String(max_length=25, choices=list(OrderStatus), default='In analysis')
     solicited_at: datetime = ormar.DateTime(timezone=True, default=datetime.time)
     paid_at: datetime | None = ormar.DateTime(nullable=True)
