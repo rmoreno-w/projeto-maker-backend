@@ -12,6 +12,6 @@ class MaterialConsumedInService(ormar.Model):
         tablename: str = 'material_consumed_in_service'
 
     id: int = ormar.Integer(primary_key=True)
-    material_id: int = ormar.ForeignKey(to=Material, skip_reverse=False, related_name='material')
-    service_in_order_id: int = ormar.ForeignKey(to=ServiceInOrder, skip_reverse=False, related_name='consumer_service')
+    material_id: int = ormar.ForeignKey(to=Material, skip_reverse=True, related_name='materials')
+    service_in_order_id: int = ormar.ForeignKey(to=ServiceInOrder, skip_reverse=False, related_name='materials')
     quantity: float = ormar.Float(minimum=0)
